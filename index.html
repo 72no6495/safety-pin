@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全ピンの不安</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .title-screen, .game-screen, .end-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .title-screen { z-index: 1; }
+        .game-screen { display: none; z-index: 2; }
+        .end-screen {
+            display: none;
+            z-index: 3;
+            background-color: red;
+            color: white;
+            font-size: 2em;
+        }
+        .start-button {
+            padding: 10px 20px;
+            font-size: 1.5em;
+            background-color: white;
+            color: black;
+            border: none;
+            cursor: pointer;
+        }
+        .image-container {
+            position: relative;
+            top: -50px; /* 画像を上へ */
+        }
+        .safety-pin {
+            width: 150px; /* サイズを大きく */
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .text-container {
+            width: 80%;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.5em;
+        }
+        .poem-line {
+            margin: 10px 0;
+            opacity: 1;
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .fade-out {
+            opacity: 0;
+            transform: translateY(20px); /* 下にフェードアウト */
+        }
+        .fade-in {
+            animation: fadeIn 0.5s; /* 上からフェードイン */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .climax { color: red; }
+        .final-image { cursor: pointer; }
+        .touch-text {
+            color: red;
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-screen">
+        <h1>安全ピンの不安</h1>
+        <button class="start-button">スタート</button>
+    </div>
+    <div class="game-screen">
+        <div class="image-container">
+            <img src="safety_pin.jpg" alt="安全ピン" class="safety-pin">
+        </div>
+        <div class="text-container" id="poem-box"></div>
+    </div>
+    <div class="end-screen" id="end-screen">おしまい</div>
+
+    <script>
+        const poem = [
+            "冷たい金属が指先に触れるたび、",
+            "小さな尖りが心を刺す。",
+            "安全ピン、",
+            "その名に隠された裏切り、",
+            "閉じているはずなのに、",
+            "なぜか開く予感が",
+            "胸の奥で蠢く。",
+            "錆びた針先が、",
+            "布を貫き、",
+            "皮膚を掠め、",
+            "血を求めるように震える。",
+            "安全だと、誰が言った？",
+            "その小さな弧は、",
+            "完璧な円を装いながら、",
+            "隙間から嘲笑を漏らす。",
+            "夜、枕の下で、",
+            "カチリと音が響く。",
+            "夢の中でさえ、",
+            "安全ピンは逃げない。",
+            "シャツの裾を留めるふりして、",
+            "私の息を留めようとする。",
+            "細い銀の罠、",
+            "無垢な顔で私を縛る。",
+            "もし外れたら？",
+            "もし刺さったら？",
+            "もし、誰も気づかず、",
+            "静かに傷が広がったら？",
+            "考えが渦を巻き、",
+            "頭の中でピンが増殖する。",
+            "一つが二つに、",
+            "二つが無数に、",
+            "私の思考を縫い合わせ、",
+            "ほどけない結び目を作る。",
+            "安全ピン、",
+            "お前は鍵か、刃か。",
+            "頼りになるはずの小さな守護者、",
+            "なのに、なぜ",
+            "その存在が不安を呼ぶのか。",
+            "指が震え、",
+            "汗が滲み、",
+            "触れるたび、",
+            "可能性の裂け目が広がる。",
+            "布を貫く音が耳に残り、",
+            "カーテンの隙間から月が覗く。",
+            "安全ピンは静かにそこにあり、",
+            "何も言わず、",
+            "ただ待つ。",
+            "私を試すように、",
+            "その冷たい瞳で。",
+            "昨日、落としたピンが",
+            "床のどこかで息を潜め、",
+            "裸足の私を待ち伏せる。",
+            "見えない敵が、",
+            "見えない場所で、",
+            "見えない時を狙う。",
+            "安全ピン、",
+            "お前は安全ではない。",
+            "混沌が私を包み、",
+            "針が空気を切り裂く幻聴。",
+            "閉じても閉じきれない恐怖、",
+            "開いても届かない安心。",
+            "安全ピン、",
+            "お前は私の影に棲み、",
+            "小さな怪物として",
+            "永遠に私を追い続ける。"
+        ];
+        const climaxIndex = 50;
+        let currentLine = 0;
+
+        const startButton = document.querySelector('.start-button');
+        const titleScreen = document.querySelector('.title-screen');
+        const gameScreen = document.querySelector('.game-screen');
+        const poemBox = document.getElementById('poem-box');
+        const endScreen = document.getElementById('end-screen');
+
+        startButton.addEventListener('click', () => {
+            titleScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+            displayNextLine();
+        });
+
+        gameScreen.addEventListener('click', () => {
+            if (currentLine < poem.length) {
+                displayNextLine();
+            } else {
+                poemBox.innerHTML = '<div class="touch-text">触ってみたら？</div>';
+                const finalImage = document.querySelector('.safety-pin');
+                finalImage.classList.add('final-image');
+                finalImage.addEventListener('click', () => {
+                    gameScreen.style.display = 'none';
+                    endScreen.style.display = 'flex';
+                });
+            }
+        });
+
+        function displayNextLine() {
+            if (currentLine < poem.length) {
+                const previousLine = poemBox.querySelector('.poem-line');
+                if (previousLine) {
+                    previousLine.classList.add('fade-out');
+                    setTimeout(() => poemBox.removeChild(previousLine), 500);
+                }
+                const line = document.createElement('div');
+                line.classList.add('poem-line', 'fade-in');
+                if (currentLine >= climaxIndex) line.classList.add('climax');
+                line.textContent = poem[currentLine];
+                poemBox.appendChild(line);
+                currentLine++;
+            }
+        }
+    </script>
+</body>
+</html>
